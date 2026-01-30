@@ -1,0 +1,99 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+//Reading the File
+
+df=pd.read_csv('flipkart_sales_enriched.csv')
+df.head(5)
+
+//Shape of the File
+
+df.info()
+print("The number of rows and columns of the table is : ",df.shape)
+
+//Renaming the column Names
+
+df.rename(columns={'Price (INR)':'Price','Total Sales (INR)':'Total Sales','Profit (INR)':'Profit'},inplace=True)
+df.head(2)
+
+//Descriptive / Aggregate Analysis
+
+total_profit=sum(df['Profit'])
+print("The total profit of the company is : ",total_profit)
+total_sales=sum(df['Total Sales'])
+print("The total sales of the company is : ",total_sales)
+total_orders=df['Order ID'].nunique()
+print("The total orders the company got is : ",total_orders)
+Total_sales_revenue=(df['Quantity Sold']*df['Price']).sum()
+print("Total sales revenue of the company is : ",Total_sales_revenue)
+average_order_value=Total_sales_revenue/total_orders
+print("The average order value per prodcut is :",average_order_value) 
+
+//Top Product by Sales, Quantity, profit
+
+top_product_sales=df.groupby('Product Name')['Total Sales'].sum().sort_values(ascending=False).head(1)
+print("Top product by sales : ",top_product_sales)
+print("\n")
+top_product_quantity_sold=df.groupby('Product Name')['Quantity Sold'].sum().sort_values(ascending=False).head(1)
+print("Top product quantity sold : ",top_product_quantity_sold)
+print("\n")
+top_product_profit=df.groupby('Product Name')['Profit'].sum().sort_values(ascending=False).head(1)
+print("Top product by profit : ",top_product_profit)
+
+//Worst Product by Sales, Quantity, Profit
+
+worst_product_sales=df.groupby('Product Name')['Total Sales'].sum().sort_values(ascending=False).tail(1)
+print("worst product by sales : ",worst_product_sales)
+print("\n")
+worst_product_quantity_sold=df.groupby('Product Name')['Quantity Sold'].sum().sort_values(ascending=False).tail(1)
+print("worst product quantity sold : ",worst_product_quantity_sold)
+print("\n")
+worst_product_profit=df.groupby('Product Name')['Profit'].sum().sort_values(ascending=False).tail(1)
+print("worst product by profit : ",worst_product_profit)
+
+//Top product by Region
+
+top_product_by_region=df.groupby('Product Name')['Region'].unique()
+print("Top product by region : ",top_product_by_region)
+
+
+//Highest and Lowest Sales by months
+
+
+highest_sales = df.groupby('Month')['Total Sales'].sum().sort_values(ascending=False).head(1)
+lowest_sales = df.groupby('Month')['Total Sales'].sum().sort_values(ascending=False).tail(1)
+
+print("Month with Highest Sales:\n", highest_sales)
+print("\nMonth with Lowest Sales:\n", lowest_sales)
+
+//Bar chart of Quantity sold per unit Product
+
+top_products=df.groupby('Product Name')['Quantity Sold'].sum().nlargest(30)
+ax=top_products.plot(kind='bar',figsize=(10,6))
+plt.xlabel('Products Name')
+plt.ylabel('Quantity Sold')
+plt.xticks(rotation=-45)
+for i, v in enumerate(top_products):
+    ax.text(i, v + 1, str(v), ha='center', va='bottom', fontsize=9)
+plt.show()
+
+//Customer Rating Charts
+
+sns.displot(df['Customer Rating'])
+
+
+sns.pairplot(df)
+
+//Profit distribution Region Wise
+
+x = df.groupby('Region')['Profit'].sum()
+
+x.plot(
+    kind='pie',
+    autopct="%.1f%%",    # show 1 decimal place
+    startangle=-145,      # rotate chart
+    ylabel='',           # remove "count" label
+    legend=True,figsize=(9,6)         # show legend
+).set_title('Profit distribution Region wise')
